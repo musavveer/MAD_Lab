@@ -4,71 +4,39 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-    Button buttonStart, buttonStop;
-    TextView counterValue;
-    public int counter=0;
-    public boolean running=false;
-
+public class MainActivity extends AppCompatActivity {
+    Button btnstart, btnstop;
+    TextView txtcounter; int i=1;
+    Handler customHandler=new Handler();
     @Override
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        buttonStart=(Button)findViewById(R.id.btn_start);
-        buttonStart.setOnClickListener(this);
-        buttonStop=(Button)findViewById(R.id.btn_stop);
-        buttonStop.setOnClickListener(this);
-        counterValue=(TextView)findViewById(R.id.txt_value);
+        btnstart=findViewById(R.id.btn_start);
+        btnstop=findViewById(R.id.btn_stop);
+        txtcounter=findViewById(R.id.textView);
+        btnstart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                customHandler.postDelayed(updateTimerThread,0);
+            }
+        });
+        btnstop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                customHandler.removeCallbacks(updateTimerThread);
+            }
+        });
     }
-
-    @Override
-    public void onClick(View v) {
-        if(v.equals(buttonStart)){
-            counterStart();
-        } else if(v.equals(buttonStop)) {
-            counterStop();
-        }
-
-    }
-
-    private void counterStop() {
-        this.running=false;
-    }
-
-    private void counterStart() {
-        counter=0;
-        running=true;
-        System.out.println("Start ->"+Thread.currentThread().getName());
-        new MyCounter().start();
-
-    }
-
-    Handler handler = new Handler(Looper.getMainLooper())
-    {
-        public void handleMessage(Message mes){
-            counterValue.setText(String.valueOf(mes.what));
+    private final Runnable updateTimerThread=new Runnable() {
+        @Override
+        public void run() {
+            txtcounter.setText(""+i); customHandler.postDelayed(this,1000); i++;
         }
     };
-
-
-    class MyCounter extends Thread{
-        public void run()
-        {
-            System.out.println("MyCounter ->"+Thread.currentThread().getName());
-            while(running){
-                counter++;
-                handler.sendEmptyMessage(counter);
-                try{
-                    Thread.sleep(1000);
-                } catch(Exception e){}
-
-            }
-        }
-    }
 }
